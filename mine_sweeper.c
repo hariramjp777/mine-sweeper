@@ -6,15 +6,11 @@
 #include "colors.h"
 
 typedef struct {
-    enum {FLAGGED, REVEALED, CONCEALED} status;
-    int cell_value;
-} Cell;
-
-typedef struct {
     int rows;
     int cols;
     int mines;
-    Cell** grid;
+    int flagged_mines;
+    int** grid;
     char** display_grid;
 } MineSweeper;
 
@@ -32,20 +28,20 @@ MineSweeper* constructMineSweeper(int rows, int cols, int mines) {
     ms->rows = rows;
     ms->cols = cols;
     ms->mines = mines;
-    ms->grid = (Cell**) (malloc(rows * sizeof(Cell*)));
+    ms->flagged_mines = 0;
+    ms->grid = (int**) (malloc(rows * sizeof(int*)));
     ms->display_grid = (char**) (malloc(rows * sizeof(char*)));
     if (ms->grid == NULL || ms->display_grid == NULL) {
         return NULL;
     }
     for (int i = 0; i < rows; i++) {
-        ms->grid[i] = (Cell*) (malloc(cols * sizeof(Cell)));
+        ms->grid[i] = (int*) (malloc(cols * sizeof(int)));
         ms->display_grid[i] = (char*) (malloc(cols * sizeof(char)));
         if (ms->grid[i] == NULL || ms->display_grid[i] == NULL) {
             return NULL;
         }
         for (int j = 0; j < cols; j++) {
-            ms->grid[i][j].cell_value = 0;
-            ms->grid[i][j].status = CONCEALED;
+            ms->grid[i][j] = 0;
             ms->display_grid[i][j] = ' ';
         }
     }
@@ -58,13 +54,13 @@ void fillGrid(MineSweeper* ms) {
     int rows, cols;
     rows = ms->rows;
     cols = ms->cols;
-    Cell** grid = ms->grid;
+    int** grid = ms->grid;
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            if (grid[i][j].cell_value == -1) {
+            if (grid[i][j] == -1) {
                 continue;
             }
-            grid[i][j].cell_value = countNeighbours(ms, i, j);
+            grid[i][j] = countNeighbours(ms, i, j);
         }
     }
 }
@@ -74,14 +70,14 @@ void setMines(MineSweeper* ms) {
     rows = ms->rows;
     cols = ms->cols;
     mines = ms->mines;
-    Cell** grid = ms->grid;
+    int** grid = ms->grid;
     srand(time(0));
     for (int i = 0; i < mines; i++) {
         do {
             row_index = rand() % rows;
             col_index = rand() % cols;
-        } while (grid[row_index][col_index].cell_value == -1);
-        grid[row_index][col_index].cell_value = -1;
+        } while (grid[row_index][col_index] == -1);
+        grid[row_index][col_index] = -1;
     }
 }
 
@@ -89,14 +85,14 @@ int countNeighbours(MineSweeper* ms, int x, int y) {
     int rows, cols, count, neighbour_x, neighbour_y;
     rows = ms->rows;
     cols = ms->cols;
-    Cell** grid = ms->grid;
+    int** grid = ms->grid;
     count = 0;
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
             neighbour_x = x + i;
             neighbour_y = y + j;
             if ((neighbour_x >= 0 && neighbour_x < rows) && (neighbour_y >= 0 && neighbour_y < cols)) {
-                if (grid[neighbour_x][neighbour_y].cell_value == -1) {
+                if (grid[neighbour_x][neighbour_y] == -1) {
                     count++;
                 }
             }
@@ -106,32 +102,31 @@ int countNeighbours(MineSweeper* ms, int x, int y) {
 }
 
 bool leftClick(MineSweeper* ms, int x, int y) {
-    Cell** grid = ms->grid;
+    int** grid = ms->grid;
     char** display_grid = ms->display_grid;
-    if (grid[x][y].status == CONCEALED) {
-        grid[x][y].status = REVEALED;
-        if (grid[x][y].cell_value == -1) {
-            display_grid[x][y] = 'M';
-            return false;
-        }
-        display_grid[x][y] = grid[x][y].cell_value + '0';
+    if (display_grid[x][y] != ' ') {
         return true;
     }
+    if (grid[x][y] == -1) {
+        display_grid[x][y] = 'M';
+        return false;
+    }
+    display_grid[x][y] = grid[x][y] + '0';
+    return true;
 }
 
 void rightClick(MineSweeper* ms, int x, int y) {
-    Cell** grid = ms->grid;
+    int** grid = ms->grid;
     char** display_grid = ms->display_grid;
-    if (grid[x][y].status == REVEALED) {
+    if (display_grid[x][y] == 'F') {
+        display_grid[x][y] = ' ';
+        ms->flagged_mines--;
         return;
     }
-    if (grid[x][y].status == FLAGGED) {
-        grid[x][y].status = CONCEALED;
-        display_grid[x][y] = ' ';
-    }
-    else {
-        grid[x][y].status = FLAGGED;
+    if (display_grid[x][y] != 'F') {
         display_grid[x][y] = 'F';
+        ms->flagged_mines++;
+        return;
     }
 }
 
