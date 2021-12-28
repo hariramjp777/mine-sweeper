@@ -23,6 +23,8 @@ int leftClick(MineSweeper* ms, int x, int y);
 void rightClick(MineSweeper* ms, int x, int y);
 void gameOver(MineSweeper* ms);
 bool goalAchieved(MineSweeper* ms);
+void play(MineSweeper* ms);
+bool checkPos(MineSweeper* ms, int pos_x, int pos_y);
 
 MineSweeper* constructMineSweeper(int rows, int cols, int mines) {
     MineSweeper* ms = (MineSweeper*) (malloc(sizeof(MineSweeper)));
@@ -138,25 +140,35 @@ void rightClick(MineSweeper* ms, int x, int y) {
 }
 
 void gameOver(MineSweeper* ms) {
-    int rows, cols, mines, flagged_mines, mines_to_open;
+    int rows, cols, mines, flagged_mines;
     rows = ms->rows;
     cols = ms->cols;
     mines = ms->mines;
-    flagged_mines = ms->mines;
-    mines_to_open = mines - 1 - flagged_mines;
+    flagged_mines = ms->flagged_mines;
     srand(time(0));
     int row_index, col_index;
-    for (int i = 0; i < mines_to_open; i++) {
+    system("cls");
+    printf("\n");
+    printGrid(ms);
+    sleep(1.7);
+    for (int i = 0; i < mines - 1; i++) {
         do {
             row_index = rand() % rows;
             col_index = rand() % cols;
-        } while (ms->display_grid[row_index][col_index] != ' ');
-        ms->grid[row_index][col_index] = -1;
+        } while (!(ms->grid[row_index][col_index] == -1 && ms->display_grid[row_index][col_index] != 'M'));
+        if (ms->display_grid[row_index][col_index] == 'F') {
+            ms->grid[row_index][col_index] = (ms->grid[row_index][col_index] == -1) ? -1 : -2;
+            continue;
+        }
         ms->display_grid[row_index][col_index] = 'M';
+        system("cls");
+        printf("\n");
+        printGrid(ms);
+        sleep(1.7);
     }
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            if (ms->display_grid[i][j] == 'F' && ms->grid[i][j] != -1) {
+            if (ms->grid[i][j] == -2 || (ms->display_grid[i][j] == 'F' && ms->grid[i][j] != -1)) {
                 ms->display_grid[i][j] = 'X';
             }
         }
@@ -184,4 +196,71 @@ void printGrid(MineSweeper* ms) {
         }
         printf("\n");
     }
+}
+
+void play(MineSweeper* ms) {
+    int option, pos_x, pos_y;
+    int prev = 1;
+    system("cls");
+    while (true) {
+        if (prev == 0) {
+            printf(F_RED "<Invalid Option>\n" RESET);        
+        }
+        printf("\n");
+        printf(F_YELLOW "Flags: %d\n" RESET, (ms->mines - ms->flagged_mines));
+        printf("\n");
+        printGrid(ms);
+        printf("\n");
+        printf(F_YELLOW "> " RESET F_D_BLUE "'1' " RESET "for LeftClick\n");
+        printf(F_YELLOW "> " RESET F_D_BLUE "'2' " RESET "for RightClick\n");
+        printf(F_YELLOW "> " RESET F_D_BLUE "'3' " RESET "for Quit\n");
+        printf("\n" F_YELLOW ">> " RESET);
+        scanf("%d", &option);
+        if (option < 0 || option > 3) {
+            prev = 0;
+            system("cls");
+            continue;
+        }
+        prev = 1;
+        if (option == 3) {
+            return;
+        }
+        do {
+            printf("\n" F_YELLOW ">> x: " RESET);
+            scanf("%d", &pos_x);
+            printf(F_YELLOW ">> y: " RESET);
+            scanf("%d", &pos_y);
+        } while (checkPos(ms, pos_x, pos_y) == false);
+        if (option == 2) {
+            rightClick(ms, pos_x, pos_y);
+            system("cls");
+            continue;
+        }
+        if (option == 1) {
+            int result = leftClick(ms, pos_x, pos_y);
+            if (result == -1) {
+                gameOver(ms);
+                system("cls");
+                printf("\n");
+                printGrid(ms);
+                printf("\n");
+                printf(F_RED "Game Over\n" RESET);
+                break;
+            }
+            if (result == 1) {
+                goalAchieved(ms);
+                system("cls");
+                printf("\n");
+                printGrid(ms);
+                printf("\n");
+                printf(F_GREEN "You win the game\n" RESET);
+                break;
+            }
+            system("cls");
+        }
+    }
+}
+
+bool checkPos(MineSweeper* ms, int pos_x, int pos_y) {
+    return (pos_x >= 0 && pos_x < ms->rows) && (pos_y >= 0 && pos_y < ms->cols);
 }

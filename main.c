@@ -3,6 +3,6 @@
 
 int main(void) {
     MineSweeper* ms = constructMineSweeper(4, 4, 4);
-    printGrid(ms);
+    play(ms);
     free(ms);
 }
