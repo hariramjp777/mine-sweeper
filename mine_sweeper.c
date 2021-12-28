@@ -107,15 +107,15 @@ int countNeighbours(MineSweeper* ms, int x, int y) {
 }
 
 int leftClick(MineSweeper* ms, int x, int y) {
-    static bool first_click = true;
-    if (first_click) {
-        fillGrid(ms, x, y);
-        first_click = false;
-    }
     int** grid = ms->grid;
     char** display_grid = ms->display_grid;
     if (display_grid[x][y] != ' ') {
         return 0;
+    }
+    static bool first_click = true;
+    if (first_click) {
+        fillGrid(ms, x, y);
+        first_click = false;
     }
     if (grid[x][y] == -1) {
         display_grid[x][y] = 'M';
