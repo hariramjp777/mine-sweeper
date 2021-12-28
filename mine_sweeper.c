@@ -26,6 +26,7 @@ void gameOver(MineSweeper* ms);
 bool goalAchieved(MineSweeper* ms);
 void play(MineSweeper* ms);
 bool checkPos(MineSweeper* ms, int pos_x, int pos_y);
+bool areNeighbours(int row_index, int col_index, int start_x, int start_y);
 
 MineSweeper* constructMineSweeper(int rows, int cols, int mines) {
     MineSweeper* ms = (MineSweeper*) (malloc(sizeof(MineSweeper)));
@@ -82,9 +83,23 @@ void setMines(MineSweeper* ms, int start_x, int start_y) {
         do {
             row_index = rand() % rows;
             col_index = rand() % cols;
-        } while ((row_index == start_x && col_index == start_y) || grid[row_index][col_index] == -1);
+        } while (areNeighbours(row_index, col_index, start_x, start_y) || grid[row_index][col_index] == -1);
         grid[row_index][col_index] = -1;
     }
+}
+
+bool areNeighbours(int row_index, int col_index, int start_x, int start_y) {
+    int neighbour_x, neighbour_y;
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+            neighbour_x = start_x + i;
+            neighbour_y = start_y + j;
+            if (neighbour_x == row_index && neighbour_y == col_index) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 int countNeighbours(MineSweeper* ms, int x, int y) {
@@ -165,7 +180,7 @@ void rightClick(MineSweeper* ms, int x, int y) {
         ms->flagged_mines--;
         return;
     }
-    if (display_grid[x][y] != 'F') {
+    if (display_grid[x][y] == ' ' && display_grid[x][y] != 'F') {
         display_grid[x][y] = 'F';
         ms->flagged_mines++;
         return;
