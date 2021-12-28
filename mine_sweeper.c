@@ -105,6 +105,36 @@ int countNeighbours(MineSweeper* ms, int x, int y) {
     return count;
 }
 
+bool leftClick(MineSweeper* ms, int x, int y) {
+    Cell** grid = ms->grid;
+    char** display_grid = ms->display_grid;
+    if (grid[x][y].status == CONCEALED) {
+        grid[x][y].status = REVEALED;
+        if (grid[x][y].cell_value == -1) {
+            display_grid[x][y] = 'M';
+            return false;
+        }
+        display_grid[x][y] = grid[x][y].cell_value + '0';
+        return true;
+    }
+}
+
+void rightClick(MineSweeper* ms, int x, int y) {
+    Cell** grid = ms->grid;
+    char** display_grid = ms->display_grid;
+    if (grid[x][y].status == REVEALED) {
+        return;
+    }
+    if (grid[x][y].status == FLAGGED) {
+        grid[x][y].status = CONCEALED;
+        display_grid[x][y] = ' ';
+    }
+    else {
+        grid[x][y].status = FLAGGED;
+        display_grid[x][y] = 'F';
+    }
+}
+
 void printGrid(MineSweeper* ms) {
     for (int i = 0, rows = ms->rows, cols = ms->cols; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
