@@ -15,9 +15,9 @@ typedef struct {
 } MineSweeper;
 
 MineSweeper* constructMineSweeper(int rows, int cols, int mines);
-void fillGrid(MineSweeper* ms);
+void fillGrid(MineSweeper* ms, int start_x, int start_y);
+void setMines(MineSweeper* ms, int start_x, int start_y);
 void printGrid(MineSweeper* ms);
-void setMines(MineSweeper* ms);
 int countNeighbours(MineSweeper* ms, int x, int y);
 int leftClick(MineSweeper* ms, int x, int y);
 void rightClick(MineSweeper* ms, int x, int y);
@@ -51,12 +51,11 @@ MineSweeper* constructMineSweeper(int rows, int cols, int mines) {
             ms->display_grid[i][j] = ' ';
         }
     }
-    fillGrid(ms);
     return ms;
 }
 
-void fillGrid(MineSweeper* ms) {
-    setMines(ms);
+void fillGrid(MineSweeper* ms, int start_x, int start_y) {
+    setMines(ms, start_x, start_y);
     int rows, cols;
     rows = ms->rows;
     cols = ms->cols;
@@ -71,7 +70,7 @@ void fillGrid(MineSweeper* ms) {
     }
 }
 
-void setMines(MineSweeper* ms) {
+void setMines(MineSweeper* ms, int start_x, int start_y) {
     int rows, cols, mines, row_index, col_index;
     rows = ms->rows;
     cols = ms->cols;
@@ -82,7 +81,7 @@ void setMines(MineSweeper* ms) {
         do {
             row_index = rand() % rows;
             col_index = rand() % cols;
-        } while (grid[row_index][col_index] == -1);
+        } while ((row_index == start_x && col_index == start_y) || grid[row_index][col_index] == -1);
         grid[row_index][col_index] = -1;
     }
 }
@@ -108,6 +107,11 @@ int countNeighbours(MineSweeper* ms, int x, int y) {
 }
 
 int leftClick(MineSweeper* ms, int x, int y) {
+    static bool first_click = true;
+    if (first_click) {
+        fillGrid(ms, x, y);
+        first_click = false;
+    }
     int** grid = ms->grid;
     char** display_grid = ms->display_grid;
     if (display_grid[x][y] != ' ') {
