@@ -18,6 +18,10 @@ typedef struct {
     char** display_grid;
 } MineSweeper;
 
+MineSweeper* constructMineSweeper(int rows, int cols, int mines);
+void setMines(MineSweeper* ms);
+void printGrid(MineSweeper* ms);
+
 MineSweeper* constructMineSweeper(int rows, int cols, int mines) {
     MineSweeper* ms = (MineSweeper*) (malloc(sizeof(MineSweeper)));
     if (ms == NULL) {
@@ -43,7 +47,24 @@ MineSweeper* constructMineSweeper(int rows, int cols, int mines) {
             ms->display_grid[i][j] = ' ';
         }
     }
+    setMines(ms);
     return ms;
+}
+
+void setMines(MineSweeper* ms) {
+    int rows, cols, mines, row_index, col_index;
+    rows = ms->rows;
+    cols = ms->cols;
+    mines = ms->mines;
+    Cell** grid = ms->grid;
+    srand(time(0));
+    for (int i = 0; i < mines; i++) {
+        do {
+            row_index = rand() % rows;
+            col_index = rand() % cols;
+        } while (grid[row_index][col_index].cell_value == -1);
+        grid[row_index][col_index].cell_value = -1;
+    }
 }
 
 void printGrid(MineSweeper* ms) {
