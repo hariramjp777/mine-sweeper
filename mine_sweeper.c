@@ -130,6 +130,32 @@ void rightClick(MineSweeper* ms, int x, int y) {
     }
 }
 
+void gameOver(MineSweeper* ms) {
+    int rows, cols, mines, flagged_mines, mines_to_open;
+    rows = ms->rows;
+    cols = ms->cols;
+    mines = ms->mines;
+    flagged_mines = ms->mines;
+    mines_to_open = mines - 1 - flagged_mines;
+    srand(time(0));
+    int row_index, col_index;
+    for (int i = 0; i < mines_to_open; i++) {
+        do {
+            row_index = rand() % rows;
+            col_index = rand() % cols;
+        } while (ms->display_grid[row_index][col_index] != ' ');
+        ms->grid[row_index][col_index] = -1;
+        ms->display_grid[row_index][col_index] = 'M';
+    }
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            if (ms->display_grid[i][j] == 'F' && ms->grid[i][j] != -1) {
+                ms->display_grid[i][j] = 'X';
+            }
+        }
+    }
+}
+
 void printGrid(MineSweeper* ms) {
     for (int i = 0, rows = ms->rows, cols = ms->cols; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
