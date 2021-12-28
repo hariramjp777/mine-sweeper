@@ -21,6 +21,7 @@ void printGrid(MineSweeper* ms);
 int countNeighbours(MineSweeper* ms, int x, int y);
 int leftClick(MineSweeper* ms, int x, int y);
 void rightClick(MineSweeper* ms, int x, int y);
+void openSurroundings(MineSweeper* ms, int x, int y);
 void gameOver(MineSweeper* ms);
 bool goalAchieved(MineSweeper* ms);
 void play(MineSweeper* ms);
@@ -121,11 +122,39 @@ int leftClick(MineSweeper* ms, int x, int y) {
         display_grid[x][y] = 'M';
         return -1;
     }
+    if (grid[x][y] == 0) {
+        openSurroundings(ms, x, y);
+    }
     display_grid[x][y] = grid[x][y] + '0';
     if (goalAchieved(ms)) {
         return 1;
     }
     return 0;
+}
+
+void openSurroundings(MineSweeper* ms, int x, int y) {
+    int rows, cols, neighbour_x, neighbour_y;
+    rows = ms->rows;
+    cols = ms->cols;
+    int** grid = ms->grid;
+    char** display_grid = ms->display_grid;
+    if (display_grid[x][y] != ' ') {
+        return;
+    }
+    if (grid[x][y] != 0) {
+        display_grid[x][y] = grid[x][y] + '0';
+        return;
+    }
+    display_grid[x][y] = grid[x][y] + '0';
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+            neighbour_x = x + i;
+            neighbour_y = y + j;
+            if (checkPos(ms, neighbour_x, neighbour_y)) {
+                openSurroundings(ms, neighbour_x, neighbour_y);
+            }
+        }
+    }
 }
 
 void rightClick(MineSweeper* ms, int x, int y) {
