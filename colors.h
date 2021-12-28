@@ -15,5 +15,6 @@
 #define B_RED_F_BLACK   "\033[0;30;41m"
 #define B_YELL_F_BLACK	"\033[7;49;33m"
 #define F_B_PURPLE      "\e[1;35m"
+#define REDHB            "\e[0;101m"
 
 #endif

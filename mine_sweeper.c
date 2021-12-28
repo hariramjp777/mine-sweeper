@@ -192,7 +192,21 @@ bool goalAchieved(MineSweeper* ms) {
 void printGrid(MineSweeper* ms) {
     for (int i = 0, rows = ms->rows, cols = ms->cols; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            printf("[%c] ", ms->display_grid[i][j]);
+            char ch = ms->display_grid[i][j];
+            printf(F_YELLOW "[" RESET);
+            if (ch == 'M') {
+                printf(REDHB "%c" RESET, '*');
+            }
+            else if (ch == 'F') {
+                printf(F_BLUE "%c" RESET, ch);
+            }
+            else if (ch == 'X') {
+                printf(F_RED "%c" RESET, ch);
+            }
+            else {
+                printf(F_B_PURPLE "%c" RESET, ch);
+            }
+            printf(F_YELLOW "] " RESET);
         }
         printf("\n");
     }
