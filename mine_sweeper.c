@@ -19,8 +19,10 @@ typedef struct {
 } MineSweeper;
 
 MineSweeper* constructMineSweeper(int rows, int cols, int mines);
-void setMines(MineSweeper* ms);
+void fillGrid(MineSweeper* ms);
 void printGrid(MineSweeper* ms);
+void setMines(MineSweeper* ms);
+int countNeighbours(MineSweeper* ms, int x, int y);
 
 MineSweeper* constructMineSweeper(int rows, int cols, int mines) {
     MineSweeper* ms = (MineSweeper*) (malloc(sizeof(MineSweeper)));
@@ -47,8 +49,24 @@ MineSweeper* constructMineSweeper(int rows, int cols, int mines) {
             ms->display_grid[i][j] = ' ';
         }
     }
-    setMines(ms);
+    fillGrid(ms);
     return ms;
+}
+
+void fillGrid(MineSweeper* ms) {
+    setMines(ms);
+    int rows, cols;
+    rows = ms->rows;
+    cols = ms->cols;
+    Cell** grid = ms->grid;
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            if (grid[i][j].cell_value == -1) {
+                continue;
+            }
+            grid[i][j].cell_value = countNeighbours(ms, i, j);
+        }
+    }
 }
 
 void setMines(MineSweeper* ms) {
@@ -65,6 +83,26 @@ void setMines(MineSweeper* ms) {
         } while (grid[row_index][col_index].cell_value == -1);
         grid[row_index][col_index].cell_value = -1;
     }
+}
+
+int countNeighbours(MineSweeper* ms, int x, int y) {
+    int rows, cols, count, neighbour_x, neighbour_y;
+    rows = ms->rows;
+    cols = ms->cols;
+    Cell** grid = ms->grid;
+    count = 0;
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+            neighbour_x = x + i;
+            neighbour_y = y + j;
+            if ((neighbour_x >= 0 && neighbour_x < rows) && (neighbour_y >= 0 && neighbour_y < cols)) {
+                if (grid[neighbour_x][neighbour_y].cell_value == -1) {
+                    count++;
+                }
+            }
+        }
+    }
+    return count;
 }
 
 void printGrid(MineSweeper* ms) {
